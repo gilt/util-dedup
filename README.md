@@ -6,13 +6,13 @@ salt) with the other company.
 Scripts here are intended to require ZERO dependencies, work cross
 platform, and be simple to use.
 
-javac *.java
+    javac *.java
 
-echo "michael@gilt.com" > test.txt
-echo "MICHAEL@gilt.com" >> test.txt
-echo " michael@gilt.com " >> test.txt
-echo "list@gilt.com " >> test.txt
+    echo "michael@gilt.com" > test.txt
+    echo "MICHAEL@gilt.com" >> test.txt
+    echo " michael@gilt.com " >> test.txt
+    echo "list@gilt.com " >> test.txt
 
-java CreateSalt > s.txt
-java HashFile s.txt test.txt > h.txt
-java -Xmx5g FindHashes s.txt test.txt h.txt
+    java CreateSalt > s.txt
+    java HashFile s.txt test.txt > h.txt
+    java -Xmx5g FindHashes s.txt test.txt h.txt
