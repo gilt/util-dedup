@@ -12,9 +12,12 @@ import java.io.BufferedReader;
  * from both companies.
  *
  * Idea is that each company:
+ *
  *   1. Generates a text file containing all their email addresses
+ *
  *   2. Invokes this program to create a new file containing the
  *      hashes of all their email addresses
+ *
  *   3. Files are then compared in any separate process to figure out
  *      which hashes are the same (appear in both companies) and which
  *      are different.

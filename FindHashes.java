@@ -11,6 +11,11 @@ import java.io.BufferedReader;
  * Given a salt, an input file of hashes, and an input file of actual
  * data (e.g. email addresses), will run through the actual data and
  * print out all lines that exist in the file of hashes.
+ *
+ * The idea here is that once we have identified the hashes which are
+ * duplicates (exist in both databases), we are going to want to find
+ * the actual email addresses corresponding to those hashes to either
+ * include them or exclude them in the event that we are running.
  */
 public class FindHashes {
 

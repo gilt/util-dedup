@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.BufferedReader;
 
 /**
- * Reads salt from a file and exposes as a string.
+ * Utility class to read salt from a file and expose it as a string.
  */
 public class Salt {
 
