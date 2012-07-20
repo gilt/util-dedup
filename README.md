@@ -8,10 +8,13 @@ platform, and be simple to use.
 
     javac *.java
 
+    # Create a test file. Note that the dedup will lowercase / trim
+    # white space for each ilne in the file.
     echo "michael@gilt.com" > emails.txt
     echo "MICHAEL@gilt.com" >> emails.txt
     echo " michael@gilt.com " >> emails.txt
-    echo "list@gilt.com " >> emails.txt
+    echo "mike@gilt.com " >> emails.txt
+    echo "mb@gilt.com " >> emails.txt
 
     # Create a salt. Takes an optional argument for the length of
     # the salt (default is 128 bytes)
