@@ -8,11 +8,21 @@ platform, and be simple to use.
 
     javac *.java
 
-    echo "michael@gilt.com" > test.txt
-    echo "MICHAEL@gilt.com" >> test.txt
-    echo " michael@gilt.com " >> test.txt
-    echo "list@gilt.com " >> test.txt
+    echo "michael@gilt.com" > emails.txt
+    echo "MICHAEL@gilt.com" >> emails.txt
+    echo " michael@gilt.com " >> emails.txt
+    echo "list@gilt.com " >> emails.txt
 
-    java CreateSalt > s.txt
-    java HashFile s.txt test.txt > h.txt
-    java -Xmx5g FindHashes s.txt test.txt h.txt
+    # Create a salt. Takes an optional argument for the length of
+    # the salt (default is 128 bytes)
+    java CreateSalt > salt.txt
+
+    # Using the provided salt, reads the file emails.txt and creates a
+    # SHA-512 hash of every line in the file.
+    java HashFile salt.txt emails.txt > hashed.txt
+
+    # This method will display every line in emails.txt where the
+    # SHA-512 hash of the salt + line exists in the file
+    # hashed.txt. Requires a larger heap as we first will read the
+    # entire contents of hashed.txt into RAM
+    java -Xmx5g FindHashes salt.txt emails.txt hashed.txt
