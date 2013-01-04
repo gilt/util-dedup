@@ -36,7 +36,7 @@ rake merge[integration,master]
     git push origin master
     Announce on yammer
 
-rake deploy[production,r20130112.1]
+rake deploy_production[r20130112.1]
 
   Wrapper for cd /web/gilt
     TAG=r20130112.1 cap iad:deploy

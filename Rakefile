@@ -68,3 +68,24 @@ task :tag do
     end
   end
 end
+
+task :deploy_production, :tag do |t, args|
+  tag = Util.get_arg(args, :tag)
+
+  if !Tag.new(DIR).exists?(tag)
+    puts "ERROR: Tag[%s] not found" % [tag]
+    exit(1)
+  end
+
+  yammer = Yammer.new(current_user)
+  yammer.message_create!("starting production deploy of rails version %s" % [tag])
+
+  Dir.chdir(DIR) do
+    Util.system_or_fail("TAG=%s cap iad:deploy" % [tag])
+  end
+
+  Util.with_exception_log do
+    yammer.message_create!("completed production deploy of rails version %s" % [tag])
+  end
+
+end

@@ -26,6 +26,10 @@ class Tag
     raise "Failed to create a tag"
   end
 
+  def exists?(tag)
+    @all_tags.include?(tag)
+  end
+
   private
   def get_all_tags
     command = "git tag -l 'r*'"

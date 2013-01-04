@@ -31,4 +31,12 @@ module Util
     puts "ERROR: #{e.to_s}"
   end
 
+  def Util.get_arg(args, name)
+    value = args[name]
+    if value.nil? || value.strip == ""
+      raise "Argument named[#{name}] cannot be empty. args[#{args.inspect}]"
+    end
+    value
+  end
+
 end
