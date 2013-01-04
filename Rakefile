@@ -155,7 +155,7 @@ task :merge, :source, :destination do |t, args|
         Util.system_or_fail(command)
       end
     end
-    if BRANCHES_FOR_YAMMER.include?(source) || BRANCHES_FOR_YAMMER.include?(destination)
+    if BRANCHES_FOR_YAMMER.include?(destination)
       yammer.message_create!("merged gilt repo: #{source} -> #{destination}")
     end
   end
