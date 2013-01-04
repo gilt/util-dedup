@@ -119,14 +119,14 @@ task :merge, :tagA, :tagB do |t, args|
 
   continue = STDIN.gets.strip
   if continue.split('').first.to_s.downcase == "y"
-    yammer.message_create!("starting merge: #{tagB} -> #{tagA}")
+    yammer.message_create!("starting merge of gilt repo: #{tagB} -> #{tagA}")
     Dir.chdir(DIR) do
       commands.each do |command|
         Util.system_or_fail(command)
       end
     end
     Util.with_exception_log do
-      yammer.message_create!("completed merge: #{tagB} -> #{tagA}")
+      yammer.message_create!("completed merge of gilt repo: #{tagB} -> #{tagA}")
     end
   end
 
