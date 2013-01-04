@@ -1,13 +1,18 @@
 Utilities for deploying rails applications at Gilt Groupe
 =========================================================
 
-Installation:
-=========================================================
-sudo gem install yammer
-git submodule init
-git submodule update
+To install:
+  git submodule init
+  git submodule update
 
+  # Setup your access token for yammer:
+  rake yammer_configure
 
-New tasks
+To add a new task
+
+  Create a library file in the subdir named tasks
+  Add your rake task to the main Rakefile
+
+Primary tasks
 =========================================================
-Create a .rb file in tasks dir
+rake tag
