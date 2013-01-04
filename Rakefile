@@ -35,6 +35,7 @@ end
 
 task :tag do
   Util.with_trace do
+    pwd = `pwd`.strip
     yammer = Yammer.new(current_user)
 
     Dir.chdir(DIR) do
@@ -44,21 +45,21 @@ task :tag do
 
     tag = Tag.new(DIR)
     current_tag = tag.current
+    new_tag = tag.next
 
     diff = Dir.chdir(DIR) do
       `git diff #{current_tag}`
     end.strip
 
-    if diff == ""
+    if diff == "" && false
       puts "Nothing has changed since tag[#{current_tag}]"
     else
-      new_tag = tag.next
       puts "current_tag[%s]. Creating tag[%s]" % [current_tag, new_tag]
       Dir.chdir(DIR) do
         Util.system_or_fail("git tag -a -m '#{new_tag}' #{new_tag}")
         Util.system_or_fail("git push --tags origin")
+        Util.system_or_fail("#{pwd}/build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
       end
-      Util.system_or_fail("build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
       yammer.message_create!("Rails #{new_tag} created")
     end
   end
