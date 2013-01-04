@@ -20,11 +20,9 @@ To add a new task
 Common deploy sequence
 =========================================================
 rake tag
-rake merge[hotfix,integration]
 rake merge[integration,master]
 rake deploy_production[xxx]
 rake merge[master,integration]
-rake merge[master,hotfix]
 
 Primary tasks
 =========================================================

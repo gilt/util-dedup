@@ -5,7 +5,7 @@ Dir.glob("tasks/*rb").each { |f| require f }
 
 DIR = "/web/gilt"
 POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
-BRANCHES_FOR_YAMMER = %w(master integration hotfix)
+BRANCHES_FOR_YAMMER = %w(master integration)
 
 current_user = `whoami`.strip
 
