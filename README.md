@@ -17,6 +17,15 @@ To add a new task
   Create a library file in the subdir named tasks
   Add your rake task to the main Rakefile
 
+Common deploy sequence
+=========================================================
+rake tag
+rake merge[hotfix,integration]
+rake merge[integration,master]
+rake deploy_production[xxx]
+rake merge[master,integration]
+rake merge[master,hotfix]
+
 Primary tasks
 =========================================================
 
@@ -32,8 +41,7 @@ rake deploy_production[r20130112.1]
 
 
 # Merge one branch into another, e.g. merge hotfix into master
-rake merge[master,hotfix]
-
+rake merge[source,destination]
 
 # Change the deploy master
 rake set_deploy_master

@@ -5,6 +5,7 @@ Dir.glob("tasks/*rb").each { |f| require f }
 
 DIR = "/web/gilt"
 POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
+BRANCHES_FOR_YAMMER = %w(master integration hotfix)
 
 current_user = `whoami`.strip
 
@@ -130,18 +131,18 @@ task :deploy_production, :tag do |t, args|
 
 end
 
-task :merge, :tagA, :tagB do |t, args|
-  tagA = Util.get_arg(args, :tagA)
-  tagB = Util.get_arg(args, :tagB)
+task :merge, :source, :destination do |t, args|
+  source = Util.get_arg(args, :source)
+  destination = Util.get_arg(args, :destination)
   yammer = Yammer.new(current_user)
 
   commands = []
-  commands << "git checkout #{tagB}"
+  commands << "git checkout #{source}"
   commands << "git pull --rebase"
-  commands << "git checkout #{tagA}"
+  commands << "git checkout #{destination}"
   commands << "git pull --rebase"
-  commands << "git merge #{tagB}"
-  commands << "git push origin #{tagA}"
+  commands << "git merge #{source}"
+  commands << "git push origin #{destination}"
 
   puts "About to execute in dir[%s]:" % [DIR]
   puts "  " << commands.join("\n  ")
@@ -149,14 +150,13 @@ task :merge, :tagA, :tagB do |t, args|
 
   continue = STDIN.gets.strip
   if continue.split('').first.to_s.downcase == "y"
-    yammer.message_create!("starting merge of gilt repo: #{tagB} -> #{tagA}")
     Dir.chdir(DIR) do
       commands.each do |command|
         Util.system_or_fail(command)
       end
     end
-    Util.with_exception_log do
-      yammer.message_create!("completed merge of gilt repo: #{tagB} -> #{tagA}")
+    if BRANCHES_FOR_YAMMER.include?(source) || BRANCHES_FOR_YAMMER.include?(destination)
+      yammer.message_create!("merged gilt repo: #{source} -> #{destination}")
     end
   end
 
