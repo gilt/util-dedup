@@ -48,7 +48,7 @@ task :tag do
     new_tag = tag.next
 
     diff = Dir.chdir(DIR) do
-      `git diff #{current_tag}`
+      `git log --pretty=format:'%h : %s' #{current_tag}..master`
     end.strip
 
     if diff == ""
@@ -60,6 +60,8 @@ task :tag do
         Util.system_or_fail("git push --tags origin")
         Util.with_exception_log do
           yammer.message_create!("Rails #{new_tag} created")
+          # TODO: Validate that this works with large messages"
+          yammer.message_create!("Diff in version #{new_tag}:\n#{diff}")
         end
         Util.with_exception_log do
           Util.system_or_fail("#{pwd}/build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
