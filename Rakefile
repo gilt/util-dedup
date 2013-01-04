@@ -112,12 +112,12 @@ task :deploy_production, :tag do |t, args|
   end
 
   yammer = Yammer.new(current_user)
-  yammer.message_create!("starting production deploy of rails version %s" % [tag])
+  yammer.message_create!("starting production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
 
   Util.system_or_fail("export TAG=%s && cd %s && cap iad:deploy" % [tag, DIR])
 
   Util.with_exception_log do
-    yammer.message_create!("completed production deploy of rails version %s" % [tag])
+    yammer.message_create!("completed production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
   end
 
   puts "Rails deploy complete. You still need to:"
