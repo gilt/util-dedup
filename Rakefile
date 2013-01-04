@@ -1,7 +1,13 @@
-Dir.glob("lib/*rb").each { |f| require f }
+require 'lib/util.rb'
+require 'lib/preconditions.rb'
+require 'lib/yammer.rb'
+
 Dir.glob("tasks/*rb").each { |f| require f }
 
 DIR = "/web/gilt"
+
+current_user = `whoami`.strip
+yammer = Yammer.new(current_user)
 
 task :tag do
   Dir.chdir(DIR) do
@@ -26,6 +32,7 @@ task :tag do
       Util.system_or_fail("git push --tags origin")
     end
     Util.system_or_fail("build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
+    yammer.message_create!("Rails #{new_tag} created")
   end
 
 end
