@@ -98,3 +98,36 @@ task :deploy_production, :tag do |t, args|
   puts ""
 
 end
+
+task :merge, :tagA, :tagB do |t, args|
+  tagA = Util.get_arg(args, :tagA)
+  tagB = Util.get_arg(args, :tagB)
+  yammer = Yammer.new(current_user)
+
+  commands = []
+  commands << "git checkout #{tagB}"
+  commands << "git pull --rebase"
+  commands << "git checkout #{tagA}"
+  commands << "git pull --rebase"
+  commands << "git merge --no-commit #{tagB}"
+  commands << "git commit -m \"Merge brand '#{tagB}' into '#{tagA}'\""
+  commands << "git push origin #{tagA}"
+
+  puts "About to execute in dir[%s]:" % [DIR]
+  puts "  " << commands.join("\n  ")
+  print "Continue? (y/n) "
+
+  continue = STDIN.gets.strip
+  if continue.split('').first.to_s.downcase == "y"
+    yammer.message_create!("starting merge: #{tagB} -> #{tagA}")
+    Dir.chdir(DIR) do
+      commands.each do |command|
+        Util.system_or_fail(command)
+      end
+    end
+    Util.with_exception_log do
+      yammer.message_create!("completed merge: #{tagB} -> #{tagA}")
+    end
+  end
+
+end

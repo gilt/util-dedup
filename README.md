@@ -31,17 +31,5 @@ rake tag
 rake deploy_production[r20130112.1]
 
 
-Tasks we still need to write
-=========================================================
-rake merge[integration,master]
-
-  Basically wrapper for cd /web/gilt
-    git checkout integration
-    git pull --rebase
-    git checkout master
-    git pull --rebase
-    git merge integration
-    git commit -a -m "Merge integration into master"
-    git push origin master
-    Announce on yammer
-
+# Merge one branch into another, e.g. merge hotfix into master
+rake merge[master,hotfix]
