@@ -4,8 +4,32 @@ require 'lib/yammer.rb'
 Dir.glob("tasks/*rb").each { |f| require f }
 
 DIR = "/web/gilt"
+POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
 
 current_user = `whoami`.strip
+
+task :set_deploy_master do
+  Util.with_trace do
+    yammer = Yammer.new(current_user)
+
+    POTENTIAL_DEPLOY_MASTERS.each_with_index do |name, index|
+      puts "#{index + 1}. #{name}"
+    end
+    master = nil
+    while master.nil?
+      print "Who is new master (1-#{POTENTIAL_DEPLOY_MASTERS.size})? "
+      index = STDIN.gets.strip.to_i - 1
+      if index >= 0
+        master = POTENTIAL_DEPLOY_MASTERS[index]
+        if master.nil?
+          puts "Invalid choice"
+        end
+      end
+    end
+    puts "Setting deploy master to %s" % [master]
+    yammer.message_create!("The deploy master is now #{master}", :topics => ['DeployMaster'])
+  end
+end
 
 task :yammer_configure do
   Util.with_trace do

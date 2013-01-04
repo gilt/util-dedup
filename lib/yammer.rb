@@ -63,10 +63,19 @@ class Yammer
     Preconditions.check_not_null(@token, "No token for username[%s]" % [username])
   end
 
-  def message_create!(body)
+  def message_create!(body, opts={})
+    topics = opts.delete(:topics) || []
+    if opts.size > 0
+      raise "Invalid opts: #{opts.inspect}"
+    end
+
     Util.with_tempfile do |path|
-      command = "curl --silent -X POST --data \"group_id=%s&body=%s\" %s/messages?access_token=%s > %s" %
-        [RAILS_DEPLOY_GROUP_ID.to_s, CGI.escape(body), API_URL, CGI.escape(@token), path]
+      data = "group_id=%s&body=%s" % [RAILS_DEPLOY_GROUP_ID.to_s, CGI.escape(body)]
+      topics.each_with_index do |t, i|
+        data << "&topic%s=%s" % [i+1, CGI.escape(t)]
+      end
+      command = "curl --silent -X POST --data \"%s\" %s/messages?access_token=%s > %s" %
+        [data, API_URL, CGI.escape(@token), path]
       Util.system_or_fail(command)
     end
   end
