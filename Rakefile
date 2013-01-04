@@ -51,16 +51,20 @@ task :tag do
       `git diff #{current_tag}`
     end.strip
 
-    if diff == "" && false
+    if diff == ""
       puts "Nothing has changed since tag[#{current_tag}]"
     else
       puts "current_tag[%s]. Creating tag[%s]" % [current_tag, new_tag]
       Dir.chdir(DIR) do
         Util.system_or_fail("git tag -a -m '#{new_tag}' #{new_tag}")
         Util.system_or_fail("git push --tags origin")
-        Util.system_or_fail("#{pwd}/build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
+        Util.with_exception_log do
+          yammer.message_create!("Rails #{new_tag} created")
+        end
+        Util.with_exception_log do
+          Util.system_or_fail("#{pwd}/build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
+        end
       end
-      yammer.message_create!("Rails #{new_tag} created")
     end
   end
 end

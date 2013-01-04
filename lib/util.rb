@@ -13,4 +13,22 @@ module Util
     raise msg
   end
 
+  def Util.with_tempfile
+    tmp = Tempfile.new('util-rails-deploy-yammer')
+    begin
+      yield tmp.path
+    ensure
+      if File.exists?(tmp.path)
+        File.delete(tmp.path)
+      end
+    end
+  end
+
+  def Util.with_exception_log
+    yield
+  rescue Exception => e
+    puts Kernel.caller.first
+    puts "ERROR: #{e.to_s}"
+  end
+
 end

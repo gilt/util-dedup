@@ -64,15 +64,10 @@ class Yammer
   end
 
   def message_create!(body)
-    tmp = Tempfile.new('util-rails-deploy-yammer')
-    begin
+    Util.with_tempfile do |path|
       command = "curl --silent -X POST --data \"group_id=%s&body=%s\" %s/messages?access_token=%s > %s" %
-        [RAILS_DEPLOY_GROUP_ID.to_s, CGI.escape(body), API_URL, CGI.escape(@token), tmp.path]
+        [RAILS_DEPLOY_GROUP_ID.to_s, CGI.escape(body), API_URL, CGI.escape(@token), path]
       Util.system_or_fail(command)
-    ensure
-      if File.exists?(tmp.path)
-        File.delete(tmp.path)
-      end
     end
   end
 
