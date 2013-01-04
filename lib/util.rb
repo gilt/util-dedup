@@ -2,7 +2,8 @@ module Util
 
   def Util.system_or_fail(command)
     puts command
-    Preconditions.check_state(system(command), "Command failed: #{command}")
+    result = system(command)
+    Preconditions.check_state(result, "Command failed - result code[%s]: %s" % [result, command])
   end
 
   def Util.with_trace

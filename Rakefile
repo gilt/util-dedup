@@ -80,12 +80,19 @@ task :deploy_production, :tag do |t, args|
   yammer = Yammer.new(current_user)
   yammer.message_create!("starting production deploy of rails version %s" % [tag])
 
-  Dir.chdir(DIR) do
-    Util.system_or_fail("TAG=%s cap iad:deploy" % [tag])
-  end
+  Util.system_or_fail("export TAG=%s && cd %s && cap iad:deploy" % [tag, DIR])
 
   Util.with_exception_log do
     yammer.message_create!("completed production deploy of rails version %s" % [tag])
   end
+
+  puts "Rails deploy complete. You still need to:"
+  puts ""
+  puts "1. Post in Skype chat room Gilt US Production"
+  puts "   rails %s to prod" % [tag]
+  puts ""
+  puts "2. Goto https://admin.gilt.com/admin/dev/monitor and make sure"
+  puts "   there is only 1 version of rails"
+  puts ""
 
 end
