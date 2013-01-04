@@ -109,8 +109,7 @@ task :merge, :tagA, :tagB do |t, args|
   commands << "git pull --rebase"
   commands << "git checkout #{tagA}"
   commands << "git pull --rebase"
-  commands << "git merge --no-commit #{tagB}"
-  commands << "git commit -m \"Merge brand '#{tagB}' into '#{tagA}'\""
+  commands << "git merge #{tagB}"
   commands << "git push origin #{tagA}"
 
   puts "About to execute in dir[%s]:" % [DIR]
