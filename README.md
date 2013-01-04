@@ -19,10 +19,19 @@ To add a new task
 
 Primary tasks
 =========================================================
+
+# Create a new tag on the /web/gilt repo
+#   -- sends changelog email
+#   -- posts to yammer group
 rake tag
 
 
-Tasks we want to write
+# Deploy a /web/gilt version to production
+#   -- posts to yammer group when deploy starts/completes
+rake deploy_production[r20130112.1]
+
+
+Tasks we still need to write
 =========================================================
 rake merge[integration,master]
 
@@ -36,8 +45,3 @@ rake merge[integration,master]
     git push origin master
     Announce on yammer
 
-rake deploy_production[r20130112.1]
-
-  Wrapper for cd /web/gilt
-    TAG=r20130112.1 cap iad:deploy
-    Announce on yammer
