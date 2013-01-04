@@ -15,7 +15,7 @@ class Yammer
 
   module AccessToken
 
-    CONFIG_FILE = "config/yammer.tokens"
+    TOKEN_FILE_PATTERN = ".yammer_token.%s"
 
     def AccessToken.is_token_valid?(token)
       if token.nil?
@@ -27,33 +27,27 @@ class Yammer
 
     def AccessToken.get_for_username(username)
       Preconditions.check_not_null(username, "Username cannot be null")
-      all_tokens[username.strip.to_sym]
+      file = AccessToken.get_file(username)
+      if File.exists?(file)
+        token = IO.read(file).strip
+        if Yammer::AccessToken.is_token_valid?(token)
+          return token
+        end
+      end
+      nil
     end
 
     def AccessToken.set_for_username!(username, token)
       Preconditions.check_not_null(username)
       Preconditions.check_not_null(token)
       Preconditions.check_state(Yammer::AccessToken.is_token_valid?(token))
-      map = all_tokens
-      map[username.strip.to_sym] = token
-
-      s = ""
-      map.keys.map(&:to_s).sort.each do |username|
-        s << "%s=%s\n" % [username, map[username.to_sym]]
-      end
-      File.open(CONFIG_FILE, "w") { |out| out << s }
+      File.open(get_file(username), "w") { |out| out << token }
     end
 
     private
-    def AccessToken.all_tokens
-      map = {}
-      IO.readlines(CONFIG_FILE).each do |line|
-        pieces = line.strip.split("=", 2)
-        if pieces.length == 2 && AccessToken.is_token_valid?(pieces[1])
-          map[pieces[0].strip.to_sym] = pieces[1].strip
-        end
-      end
-      map
+    def AccessToken.get_file(username)
+      Preconditions.check_not_null(username, "Username cannot be null")
+      TOKEN_FILE_PATTERN % [username]
     end
 
   end

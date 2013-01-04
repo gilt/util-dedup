@@ -8,6 +8,13 @@ POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
 
 current_user = `whoami`.strip
 
+task :yammer_test_post do
+  Util.with_trace do
+    yammer = Yammer.new(current_user)
+    yammer.message_create!("Test from %s" % [current_user])
+  end
+end
+
 task :set_deploy_master do
   Util.with_trace do
     yammer = Yammer.new(current_user)
