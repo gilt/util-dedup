@@ -128,6 +128,9 @@ task :deploy_production, :tag do |t, args|
   puts "2. Goto https://admin.gilt.com/admin/dev/monitor and make sure"
   puts "   there is only 1 version of rails"
   puts ""
+  puts "3. Change the deploy master"
+  puts "   rake set_deploy_master"
+  puts ""
 
 end
 

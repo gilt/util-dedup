@@ -19,13 +19,17 @@ To add a new task
 
 Common deploy sequence
 =========================================================
-rake tag
 rake merge[integration,master]
+rake tag
 rake deploy_production[xxx]
 rake merge[master,integration]
 
 Primary tasks
 =========================================================
+
+# Merge one branch into another, e.g. merge hotfix into master
+rake merge[source,destination]
+
 
 # Create a new tag on the /web/gilt repo
 #   -- sends changelog email
@@ -38,13 +42,9 @@ rake tag
 rake deploy_production[r20130112.1]
 
 
-# Merge one branch into another, e.g. merge hotfix into master
-rake merge[source,destination]
+# Change the deploy master
+rake set_deploy_master
 
 
 # Cherry pick a commit to a branch
 rake merge[ref,integration]
-
-
-# Change the deploy master
-rake set_deploy_master
