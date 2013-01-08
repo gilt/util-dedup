@@ -19,10 +19,9 @@ To add a new task
 
 Common deploy sequence
 =========================================================
-rake merge[integration,master]
-rake tag
-rake deploy_production[xxx]
-rake merge[master,integration]
+rake merge_and_deploy_to_production[master]
+rake merge_and_deploy_to_production[integration]
+rake deploy_to_production[r20130103.1]
 
 Primary tasks
 =========================================================
@@ -39,12 +38,12 @@ rake tag
 
 # Deploy a /web/gilt version to production
 #   -- posts to yammer group when deploy starts/completes
-rake deploy_production[r20130112.1]
+rake deploy_to_production[r20130112.1]
 
 
 # Change the deploy master
 rake set_deploy_master
 
 
-# Cherry pick a commit to a branch
-rake merge[ref,integration]
+# Cherry pick ref to a branch
+rake cherrypick[ref,integration]

@@ -6,6 +6,7 @@ Dir.glob("tasks/*rb").each { |f| require f }
 DIR = "/web/gilt"
 POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
 BRANCHES_FOR_YAMMER = %w(master integration)
+MASTER = 'master'
 
 current_user = `whoami`.strip
 
@@ -103,7 +104,30 @@ task :tag do
   end
 end
 
-task :deploy_production, :tag do |t, args|
+task :merge_and_deploy_to_production, :branch do |t, args|
+  branch = Util.get_arg(args, :branch)
+  yammer = Yammer.new(current_user)
+
+  commands = []
+  if branch != MASTER
+    commands << "rake merge[%s,%s]" % [branch, MASTER]
+  end
+  commands << "rake tag"
+  commands << "rake deploy_latest_to_production"
+  if branch != MASTER
+    commands << "rake merge[%s,%s]" % [MASTER, branch]
+  end
+  commands << "rake set_deploy_master"
+
+  Util.ask_to_execute(DIR, commands)
+end
+
+task :deploy_latest_to_production do
+  tag = Tag.new(DIR)
+  Rake::Task['deploy_to_production'].invoke(tag.current)
+end
+
+task :deploy_to_production, :tag do |t, args|
   tag = Util.get_arg(args, :tag)
 
   if !Tag.new(DIR).exists?(tag)
