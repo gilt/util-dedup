@@ -41,5 +41,10 @@ rake deploy_production[r20130112.1]
 # Merge one branch into another, e.g. merge hotfix into master
 rake merge[source,destination]
 
+
+# Cherry pick a commit to a branch
+rake merge[ref,integration]
+
+
 # Change the deploy master
 rake set_deploy_master

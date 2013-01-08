@@ -131,6 +131,23 @@ task :deploy_production, :tag do |t, args|
 
 end
 
+task :cherrypick, :ref, :branch do |t, args|
+  ref = Util.get_arg(args, :ref )
+  branch = Util.get_arg(args, :branch)
+  yammer = Yammer.new(current_user)
+
+  commands = []
+  commands << "git fetch"
+  commands << "git checkout #{branch}"
+  commands << "git pull --rebase"
+  commands << "git cherry-pick -x #{ref}"
+  commands << "git push origin #{branch}"
+
+  Util.ask_to_execute(DIR, commands) do
+    yammer.message_create!("cherry-picked #{ref} to #{branch}")
+  end
+end
+
 task :merge, :source, :destination do |t, args|
   source = Util.get_arg(args, :source)
   destination = Util.get_arg(args, :destination)
@@ -144,17 +161,7 @@ task :merge, :source, :destination do |t, args|
   commands << "git merge #{source}"
   commands << "git push origin #{destination}"
 
-  puts "About to execute in dir[%s]:" % [DIR]
-  puts "  " << commands.join("\n  ")
-  print "Continue? (y/n) "
-
-  continue = STDIN.gets.strip
-  if continue.split('').first.to_s.downcase == "y"
-    Dir.chdir(DIR) do
-      commands.each do |command|
-        Util.system_or_fail(command)
-      end
-    end
+  Util.ask_to_execute(DIR, commands) do
     if BRANCHES_FOR_YAMMER.include?(destination)
       yammer.message_create!("merged gilt repo: #{source} -> #{destination}")
     end

@@ -40,4 +40,22 @@ module Util
     value
   end
 
+  def Util.ask_to_execute(dir, commands, &block)
+    puts "About to execute in dir[%s]:" % [dir]
+    puts "  " << commands.join("\n  ")
+    print "Continue? (y/n) "
+
+    continue = STDIN.gets.strip
+    if continue.split('').first.to_s.downcase == "y"
+      Dir.chdir(dir) do
+        commands.each do |command|
+          Util.system_or_fail(command)
+        end
+      end
+
+      if block_given?
+        block.call
+      end
+    end
+  end
 end
