@@ -47,6 +47,8 @@ namespace :production do
     [[even_rails_servers], [odd_rails_servers]].each do |hosts|
       run stop_passenger_commands.join(' && '), :hosts => hosts
       run start_passenger_commands.join(' && '), :hosts => hosts
+      # a second to let zeus pool bring back the nodes we just restartd
+      sleep 1
     end
   end
 
