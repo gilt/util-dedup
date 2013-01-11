@@ -1,7 +1,4 @@
-require 'lib/util.rb'
-require 'lib/preconditions.rb'
-require 'lib/yammer.rb'
-Dir.glob("tasks/*rb").each { |f| require f }
+require 'lib/load.rb'
 
 DIR = "/web/gilt"
 POTENTIAL_DEPLOY_MASTERS = %w(ssmith mbryzek khyland rmartin).sort
