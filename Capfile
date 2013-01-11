@@ -95,7 +95,9 @@ namespace :production do
 
   def start_passenger_commands
     ["sudo find /service -maxdepth 1 -name httpd* | xargs sudo svc -u",
-     "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -u"]
+     "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -u",
+     "sleep 3",
+     "curl --silent 'http://localhost/system/ping'"]
   end
 
   def even_rails_servers
