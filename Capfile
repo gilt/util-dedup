@@ -48,7 +48,7 @@ namespace :production do
       run stop_passenger_commands.join(' && '), :hosts => hosts
       run start_passenger_commands.join(' && '), :hosts => hosts
       # a second to let zeus pool bring back the nodes we just restartd
-      sleep 1
+      sleep 5
     end
   end
 
