@@ -54,7 +54,7 @@ class Yammer
 
   def initialize(username)
     @token = Yammer::AccessToken.get_for_username(username)
-    Preconditions.check_not_null(@token, "No token for username[%s]" % [username])
+    Preconditions.check_not_null(@token, "No token for username[%s] - run:\n  rake yammer_configure" % [username])
   end
 
   def message_create!(body, opts={})
