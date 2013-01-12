@@ -133,9 +133,16 @@ task :deploy_to_production, :tag do |t, args|
   end
 
   yammer = Yammer.new(current_user)
+
+  puts "Rails deploy starting. Post Skype chat room Gilt US Production"
+  puts "   rails %s to prod" % [tag]
+  if !Util.ask_boolean("Continue?")
+    exit(0)
+  end
+
   yammer.message_create!("starting production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
 
-  Util.system_or_fail("export TAG=%s && cd %s && cap iad:deploy" % [tag, DIR])
+  Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
 
   Util.with_exception_log do
     yammer.message_create!("completed production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
@@ -143,13 +150,10 @@ task :deploy_to_production, :tag do |t, args|
 
   puts "Rails deploy complete. You still need to:"
   puts ""
-  puts "1. Post in Skype chat room Gilt US Production"
-  puts "   rails %s to prod" % [tag]
-  puts ""
-  puts "2. Goto https://admin.gilt.com/admin/dev/monitor and make sure"
+  puts "1. Goto https://admin.gilt.com/admin/dev/monitor and make sure"
   puts "   there is only 1 version of rails"
   puts ""
-  puts "3. Change the deploy master"
+  puts "2. Change the deploy master"
   puts "   rake set_deploy_master"
   puts ""
 

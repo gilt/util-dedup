@@ -1,123 +1,173 @@
 require 'lib/load.rb'
 
-DIR = "/web/gilt"
-
 set :gateway, '10.50.50.14'
 
-role :rails_server, 'weba1', :primary => true
-role :rails_server, 'weba2', 'weba3', 'web-rails1', 'web-rails2', 'web-rails3'
-role :job_worker, 'job2', :primary => true
-role :job_worker, 'job3'
 role :warehouse_server, 'job3'
+role :job_worker, 'job2', 'job3'
+role :rails_server, 'weba1', 'weba2', 'weba3', 'web-rails1', 'web-rails2', 'web-rails3'
 
 ALL_ROLES = [:rails_server, :job_worker, :warehouse_server]
 
 namespace :production do
 
   task :deploy_with_gems do
-    do_deploy(:gems => true)
+    Deploy.new(self, ENV['TAG'].to_s, :gems => true).run
   end
 
   task :deploy do
-    do_deploy(ENV['TAG'])
+    Deploy.new(self, ENV['TAG'].to_s).run
   end
 
-  task :deploy_latest do
-    tag = Tag.new(DIR)
-    do_deploy(tag.current)
+end
+
+class Deploy
+
+  def initialize(cap, tag, opts={})
+    @cap = Preconditions.check_not_null(cap)
+    @tag = tag
+    Preconditions.check_argument(tag.to_s != "", "missing TAG environment variable")
+    @gems = opts.delete(:gems) ? true : false
+    Preconditions.check_state(opts.empty?, "Invalid opts: #{opts.inspect}")
   end
 
-  def do_deploy(tag, opts={})
-    if tag.to_s == ""
-      raise "missing tag"
+  def run
+    commands = Commands.new(@cap, @tag)
+    commands.run :deploy_code, :roles => ALL_ROLES
+
+    if @gems
+      commands.run :install_gems, :roles => ALL_ROLES
     end
-    gems = opts.delete(:gems)
 
-    run deploy_code_commands(tag).join(' && '), :roles => ALL_ROLES
-    if gems
-      run install_gems_commands.join(' && '), :roles => ALL_ROLES
+    threads = []
+    threads << Thread.new do
+      commands.run :stop_jobs, :roles => [:job_worker]
+      commands.run :start_jobs, :roles => [:job_worker]
     end
 
-    run stop_jobs_commands(tag).join(' && '), :roles => [:job_worker]
-    run stop_warehouse_commands.join(' && '), :roles => [:warehouse_server]
-    run kill_jobs_commands.join(' && '), :roles => [:job_worker]
-    run start_jobs_commands.join(' && '), :roles => [:job_worker]
-    run start_warehouse_commands.join(' && '), :roles => [:warehouse_server]
-
-    [[even_rails_servers], [odd_rails_servers]].each do |hosts|
-      run stop_passenger_commands.join(' && '), :hosts => hosts
-      run start_passenger_commands.join(' && '), :hosts => hosts
-      # a second to let zeus pool bring back the nodes we just restartd
-      sleep 5
+    threads << Thread.new do
+      commands.run :stop_warehouse, :roles => [:warehouse_server]
+      commands.run :start_warehouse, :roles => [:warehouse_server]
     end
-  end
 
-  def deploy_code_commands(tag)
-    ['ulimit -n 10000',
-     'umask 002',
-     'cd /web/gilt',
-     'sudo chmod -R g+w /web/gilt/.git',
-     'git fetch',
-     "git checkout -f #{tag}"
-    ]
-  end
-
-  def install_gems_commands
-    ["sudo chown -fR web:web #{webroot}/vendor",
-     "sudo chmod -fR g+w #{webroot}/vendor",
-     %Q{cd #{webroot} && sudo -u web CXX=g++ /usr/local/bin/gem bundle --only production}]
-  end
-
-  def stop_jobs_commands(tag)
-    message = "Cancelled by deployment of #{tag}"
-    ["sudo find /service -maxdepth 1 -name job_worker* | xargs sudo svc -d",
-     "curl -X DELETE \"job3.prod.iad:8080/api/1/task/cancel/started?message=#{message}\""]
-  end
-
-  def kill_jobs_commands
-    ["ps -ef | grep catwalk | grep -v grep | awk '{print \"sudo kill -9 \" $2}' | sh"]
-  end
-
-  def start_jobs_commands
-    ["sudo find /service -maxdepth 1 -name job_worker* | xargs sudo svc -u"]
-  end
-
-  def stop_warehouse_commands
-    ["sudo find /service -maxdepth 1 -name *thin* | xargs sudo svc -d"]
-  end
-
-  def start_warehouse_commands
-    ["sudo find /service -maxdepth 1 -name *thin* | xargs sudo svc -u"]
-  end
-
-  def stop_passenger_commands
-    ["sudo find /service -maxdepth 1 -name httpd* | xargs sudo svc -d",
-     "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -d"]
-  end
-
-  def start_passenger_commands
-    ["sudo find /service -maxdepth 1 -name httpd* | xargs sudo svc -u",
-     "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -u",
-     "sleep 3",
-     "curl --silent 'http://localhost/system/ping'"]
-  end
-
-  def even_rails_servers
-    select_rails_servers(0)
-  end
-
-  def odd_rails_servers
-    select_rails_servers(1)
-  end
-
-  def select_rails_servers(target_index)
-    servers = []
-    find_servers(:roles => [:rails_server]).each_with_index do |host, index|
-      if index % 2 == target_index
-        servers << host
+    threads << Thread.new do
+      all_hosts = @cap.find_servers(:roles => [:rails_server]).map(&:host).sort
+      HostSplitter.new(all_hosts).each do |hosts|
+        commands.run :stop_passenger, :hosts => hosts
+        commands.run :start_passenger, :hosts => hosts
+        # a second to let zeus pool bring back the nodes we just restartd
+        sleep 5
       end
     end
-    servers
+
+    threads.each { |t| t.join }
+  end
+
+  # Takes a list of hosts and splits into two lists, as even as
+  # possible
+  class HostSplitter
+
+    def initialize(hosts)
+      @hosts = hosts
+    end
+
+    def each
+      yield select(0)
+      yield select(1)
+    end
+
+    private
+    def select(target_index)
+      servers = []
+      @hosts.each_with_index do |host, index|
+        if index % 2 == target_index
+          servers << host
+        end
+      end
+      servers
+    end
+  end
+
+  class Commands
+
+    def initialize(cap, tag)
+      @cap = Preconditions.check_not_null(cap)
+      @tag = Preconditions.check_not_null(tag)
+    end
+
+    def run(command_name, opts={})
+      params = {}
+      if roles = opts.delete(:roles)
+        params[:roles] = roles
+      end
+      if hosts = opts.delete(:hosts)
+        params[:hosts] = hosts
+      end
+      Preconditions.check_state(opts.empty?, "Invalid opts: #{opts.inspect}")
+
+      commands = self.send(command_name)
+      @cap.run commands.join(' && '), params
+    end
+
+    private
+
+    def deploy_code
+      ['ulimit -n 10000',
+       'umask 002',
+       'cd /web/gilt',
+       'sudo chmod -R g+w /web/gilt/.git',
+       'git fetch',
+       "git checkout -f #{@tag}"
+      ]
+    end
+
+    def install_gems
+      ["sudo chown -fR web:web #{webroot}/vendor",
+       "sudo chmod -fR g+w #{webroot}/vendor",
+       %Q{cd #{webroot} && sudo -u web CXX=g++ /usr/local/bin/gem bundle --only production}]
+    end
+
+    def stop_jobs
+      message = "Cancelled by deployment of #{@tag}"
+      ["sudo find /service -maxdepth 1 -name job_worker* | xargs sudo svc -d",
+       "curl -X DELETE \"job3.prod.iad:8080/api/1/task/cancel/started?message=#{message}\"",
+       "sleep 1",
+       kill("catwalk")]
+    end
+
+    def start_jobs
+      ["sudo find /service -maxdepth 1 -name job_worker* | xargs sudo svc -u"]
+    end
+
+    def stop_warehouse
+      ["sudo find /service -maxdepth 1 -name *thin* | xargs sudo svc -d",
+       "sleep 1",
+       kill("thin")]
+    end
+
+    def start_warehouse
+      ["sudo find /service -maxdepth 1 -name *thin* | xargs sudo svc -u"]
+    end
+
+    def stop_passenger
+      ["sudo find /service -maxdepth 1 -name httpd* | xargs sudo svc -d",
+       "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -d",
+       "sleep 1",
+       kill("httpd"),
+       kill("thin")]
+    end
+
+    def start_passenger
+      ["sudo find /service -maxdepth 1 -name httpd* | xargs sudo svc -u",
+       "sudo find /service -maxdepth 1 -name *_thin* | xargs sudo svc -u",
+       "sleep 5",
+       "curl --silent 'http://localhost/system/ping'"]
+    end
+
+    private
+    def kill(name)
+      "ps -ef | grep #{name} | grep -v grep | awk '{print \"sudo kill -9 \" $2}' | sh"
+    end
+
   end
 
 end

@@ -40,13 +40,18 @@ module Util
     value
   end
 
+  # Prints message followed by y/n. Returns true if user enters
+  # y/yes/etc. false otherwise.
+  def Util.ask_boolean(message)
+    print message.strip + " (y/n) "
+    continue = STDIN.gets.strip
+    continue.split('').first.to_s.downcase == "y"
+  end
+
   def Util.ask_to_execute(dir, commands, &block)
     puts "About to execute in dir[%s]:" % [dir]
     puts "  " << commands.join("\n  ")
-    print "Continue? (y/n) "
-
-    continue = STDIN.gets.strip
-    if continue.split('').first.to_s.downcase == "y"
+    if Util.ask_boolean("Continue?")
       Dir.chdir(dir) do
         commands.each do |command|
           Util.system_or_fail(command)
