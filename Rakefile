@@ -144,18 +144,13 @@ task :deploy_to_production, :tag do |t, args|
 
   Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
 
-  Util.with_exception_log do
-    yammer.message_create!("completed production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
+  if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
+    message = "completed production deploy of rails version %s" % [tag]
+    puts message
+    Util.with_exception_log do
+      yammer.message_create!(message, :topics => ['ProductionDeploy'])
+    end
   end
-
-  puts "Rails deploy complete. You still need to:"
-  puts ""
-  puts "1. Goto https://admin.gilt.com/admin/dev/monitor and make sure"
-  puts "   there is only 1 version of rails"
-  puts ""
-  puts "2. Change the deploy master"
-  puts "   rake set_deploy_master"
-  puts ""
 
 end
 
