@@ -54,7 +54,7 @@ class Deploy
       HostSplitter.new(all_hosts).each do |hosts|
         commands.run :stop_passenger, :hosts => hosts
         commands.run :start_passenger, :hosts => hosts
-        # a second to let zeus pool bring back the nodes we just restartd
+        # a second to let zeus pool bring back the nodes we just restart
         sleep 5
       end
     end
