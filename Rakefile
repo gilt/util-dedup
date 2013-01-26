@@ -18,7 +18,7 @@ end
 desc "Create a new tag on the /web/gilt repo; sends notifications"
 task :tag, :repo do |t, args|
   repo = Util.get_arg(args, :repo)
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag")
+  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create")
 end
 
 desc "merge a branch to master, tag, and deploy to production"
