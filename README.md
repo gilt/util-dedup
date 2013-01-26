@@ -1,11 +1,14 @@
 Utilities for deploying rails applications at Gilt Groupe
 
+This is mostly a wrapper around util-install library, with simpler
+rake commands for common tasks.
+
 
 Common flow
 =========================================================
-rake create_release_branch[bizops]
-rake merge_and_deploy_to_production[bizops_20121212]
-rake deploy_to_production[r20130103.1]
+rake create_release_branch[gilt,bizops]
+rake merge_and_deploy_to_production[gilt,bizops_20121212]
+rake deploy_to_production[gilt,r20130103.1]
 
 
 Adding new code
