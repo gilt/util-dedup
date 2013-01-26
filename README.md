@@ -1,42 +1,14 @@
 Utilities for deploying rails applications at Gilt Groupe
+
+
+Common flow
 =========================================================
-
-To install:
-  git submodule init
-  git submodule update
-
-To add a new task
-
-  Create a library file in the subdir named tasks
-  Add your rake task to the main Rakefile
-
-Common deploy sequence
-=========================================================
-rake merge_and_deploy_to_production[master]
-rake merge_and_deploy_to_production[integration]
+rake create_release_branch[bizops]
+rake merge_and_deploy_to_production[bizops_20121212]
 rake deploy_to_production[r20130103.1]
 
-Primary tasks
+
+Adding new code
 =========================================================
-
-# Merge one branch into another, e.g. merge hotfix into master
-rake merge[source,destination]
-
-
-# Create a new tag on the /web/gilt repo
-#   -- sends changelog email
-#   -- sends email
-rake tag
-
-
-# Deploy a /web/gilt version to production
-#   -- sends email
-rake deploy_to_production[r20130112.1]
-
-
-# Change the deploy master
-rake set_deploy_master
-
-
-# Cherry pick ref to a branch
-rake cherrypick[ref,integration]
+ 1. Add your file in lib/
+ 2. Update lib/load.rb
