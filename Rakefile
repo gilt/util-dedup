@@ -7,17 +7,8 @@ MASTER = 'master'
 
 current_user = `whoami`.strip
 
-task :yammer_test_post do
-  Util.with_trace do
-    yammer = Yammer.new(current_user)
-    yammer.message_create!("Test from %s" % [current_user])
-  end
-end
-
 task :set_deploy_master do
   Util.with_trace do
-    yammer = Yammer.new(current_user)
-
     POTENTIAL_DEPLOY_MASTERS.each_with_index do |name, index|
       puts "#{index + 1}. #{name}"
     end
@@ -33,40 +24,12 @@ task :set_deploy_master do
       end
     end
     puts "Setting deploy master to %s" % [master]
-    yammer.message_create!("The deploy master is now #{master}", :topics => ['DeployMaster'])
-  end
-end
-
-task :yammer_configure do
-  Util.with_trace do
-    puts "Current user is %s" % [current_user]
-    if token = Yammer::AccessToken.get_for_username(current_user)
-      puts "Your yammer token is: #{token}"
-    else
-      puts "You do not have a yammer token yet. To get one:"
-      puts "  1. In a browser, goto "
-      puts "     #{Yammer::GET_TOKEN_URL}"
-      puts "After you authenticate, you will be redirected to a URL that contains a"
-      puts "URL parameter access_token."
-      puts ""
-      while true
-        puts "Enter the token value here: "
-        token = STDIN.gets.strip
-        if Yammer::AccessToken.is_token_valid?(token)
-          Yammer::AccessToken.set_for_username!(current_user, token)
-          break
-        else
-          puts "*** Invalid token"
-        end
-      end
-    end
   end
 end
 
 task :tag do
   Util.with_trace do
     pwd = `pwd`.strip
-    yammer = Yammer.new(current_user)
 
     Dir.chdir(DIR) do
       Util.system_or_fail("git checkout master")
@@ -89,9 +52,6 @@ task :tag do
         Util.system_or_fail("git tag -a -m '#{new_tag}' #{new_tag}")
         Util.system_or_fail("git push --tags origin")
         Util.with_exception_log do
-          yammer.message_create!("Rails #{new_tag} created\nDiff[#{current_tag}..master]:\n#{diff}")
-        end
-        Util.with_exception_log do
           Util.system_or_fail("#{pwd}/build/bin/gilt-send-changelog-email.rb gilt #{current_tag} #{new_tag}")
         end
       end
@@ -101,7 +61,6 @@ end
 
 task :merge_and_deploy_to_production, :branch do |t, args|
   branch = Util.get_arg(args, :branch)
-  yammer = Yammer.new(current_user)
 
   commands = []
   if branch != MASTER
@@ -130,7 +89,6 @@ task :deploy_to_production, :tag do |t, args|
     exit(1)
   end
 
-  yammer = Yammer.new(current_user)
 
   puts "Rails deploy starting. Post Skype chat room Gilt US Production"
   puts "   rails %s to prod" % [tag]
@@ -138,16 +96,11 @@ task :deploy_to_production, :tag do |t, args|
     exit(0)
   end
 
-  yammer.message_create!("starting production deploy of rails version %s" % [tag], :topics => ['ProductionDeploy'])
-
   Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
 
   if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
     message = "completed production deploy of rails version %s" % [tag]
     puts message
-    Util.with_exception_log do
-      yammer.message_create!(message, :topics => ['ProductionDeploy'])
-    end
   end
 
 end
@@ -155,7 +108,6 @@ end
 task :cherrypick, :ref, :branch do |t, args|
   ref = Util.get_arg(args, :ref )
   branch = Util.get_arg(args, :branch)
-  yammer = Yammer.new(current_user)
 
   commands = []
   commands << "git fetch"
@@ -164,15 +116,12 @@ task :cherrypick, :ref, :branch do |t, args|
   commands << "git cherry-pick -x #{ref}"
   commands << "git push origin #{branch}"
 
-  Util.ask_to_execute(DIR, commands) do
-    yammer.message_create!("cherry-picked #{ref} to #{branch}")
-  end
+  Util.ask_to_execute(DIR, commands)
 end
 
 task :merge, :source, :destination do |t, args|
   source = Util.get_arg(args, :source)
   destination = Util.get_arg(args, :destination)
-  yammer = Yammer.new(current_user)
 
   commands = []
   commands << "git checkout #{source}"
@@ -182,10 +131,5 @@ task :merge, :source, :destination do |t, args|
   commands << "git merge #{source}"
   commands << "git push origin #{destination}"
 
-  Util.ask_to_execute(DIR, commands) do
-    if BRANCHES_FOR_YAMMER.include?(destination)
-      yammer.message_create!("merged gilt repo: #{source} -> #{destination}")
-    end
-  end
-
+  Util.ask_to_execute(DIR, commands)
 end

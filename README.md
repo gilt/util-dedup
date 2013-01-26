@@ -5,13 +5,6 @@ To install:
   git submodule init
   git submodule update
 
-  # Setup your access token for yammer:
-  rake yammer_configure
-
-  # If something goes wrong, all this task does is update the file
-  #   /web/util-rails-deploy/config/yammer.tokens
-  # You can just manually list your token there
-
 To add a new task
 
   Create a library file in the subdir named tasks
@@ -32,12 +25,12 @@ rake merge[source,destination]
 
 # Create a new tag on the /web/gilt repo
 #   -- sends changelog email
-#   -- posts to yammer group
+#   -- sends email
 rake tag
 
 
 # Deploy a /web/gilt version to production
-#   -- posts to yammer group when deploy starts/completes
+#   -- sends email
 rake deploy_to_production[r20130112.1]
 
 
