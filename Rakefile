@@ -9,6 +9,7 @@ def run(command)
   end
 end
 
+desc "Creates a new release branch - if there is an existing release branch, fails, otherwise will create a new branch and update setup that this is the new release branch"
 task :create_release_branch, :repo, :branch do |t, args|
   repo = Util.get_arg(args, :repo)
   branch = Util.get_arg(args, :branch)
@@ -21,7 +22,7 @@ task :tag, :repo do |t, args|
   run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create")
 end
 
-desc "merge a branch to master, tag, and deploy to production"
+desc "Merge a branch to master, tag, deploy to production, send notifications"
 task :merge_and_deploy_to_production, :repo, :branch do |t, args|
   repo = Util.get_arg(args, :repo)
   branch = Util.get_arg(args, :branch)
@@ -36,7 +37,7 @@ task :cherrypick, :repo, :ref, :branch do |t, args|
   run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} cherry-pick %s %s" % [ref, branch])
 end
 
-desc "Deploy a specific tag to production"
+desc "Create a new tag in repo, send notifications"
 task :deploy_to_production, :repo, :tag do |t, args|
   repo = Util.get_arg(args, :repo)
   tag = Util.get_arg(args, :tag)
