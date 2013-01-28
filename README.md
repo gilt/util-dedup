@@ -7,8 +7,8 @@ rake commands for common tasks.
 Common flow
 =========================================================
 rake create_release_branch[gilt,bizops]
-rake merge_and_deploy_to_production[gilt,bizops_20121212]
-rake deploy_to_production[gilt,r20130103.1]
+rake merge[gilt,bizops_20121212,master]
+rake deploy[production,gilt,r20130103.1]
 
 
 Adding new code

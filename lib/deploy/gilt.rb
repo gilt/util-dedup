@@ -3,20 +3,23 @@ module Deploy
 
   module Gilt
 
-    def Gilt.deploy_to_production(tag)
-      puts "Rails deploy starting. You need to manually post into the Skype chat room Gilt US Production"
-      puts "   rails %s to prod" % [tag]
+    def Gilt.deploy(env, tag)
+      puts "Rails deploy to env[#{env}] starting. You need to manually post into the Skype chat room Gilt US Production"
+      puts "   rails %s to %s" % [tag, env]
       if !Util.ask_boolean("Continue?")
         exit(0)
       end
 
-      #Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
+      if env != 'production'
+        raise "Not yet implemented for env[%s]" % [env]
+      end
+
+      Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
 
       if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
         message = "completed production deploy of rails version %s" % [tag]
         puts message
       end
-
 
     end
 

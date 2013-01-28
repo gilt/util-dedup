@@ -22,10 +22,11 @@ task :tag, :repo do |t, args|
   run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create")
 end
 
-desc "Merge a branch to master, tag, deploy to production, send notifications"
-task :merge_and_deploy_to_production, :repo, :branch do |t, args|
+desc "Merge source branch into other, publishing announcement if dest_branch is master"
+task :merge, :repo, :source_branch, :dest_branch do |t, args|
   repo = Util.get_arg(args, :repo)
   branch = Util.get_arg(args, :branch)
+  raise 'NOT DONE'
   run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release_owner merge #{branch}")
 end
 
@@ -38,7 +39,8 @@ task :cherrypick, :repo, :ref, :branch do |t, args|
 end
 
 desc "Create a new tag in repo, send notifications"
-task :deploy_to_production, :repo, :tag do |t, args|
+task :deploy, :env, :repo, :tag do |t, args|
+  env = Util.get_arg(args, :env)
   repo = Util.get_arg(args, :repo)
   tag = Util.get_arg(args, :tag)
   dir = "/web/#{repo}"
@@ -46,13 +48,11 @@ task :deploy_to_production, :repo, :tag do |t, args|
     puts "ERROR: Tag[%s] not found" % [tag]
     exit(1)
   end
-  raise 's'
   class_name = "Deploy::#{repo.capitalize}"
   begin
     klass = eval(class_name)
   rescue Exception => e
     raise "Could not find class[#{class_name}]. If repo name is correct, the module should be defined in lib/deploy/"
   end
-  klass.send(:deploy_to_production, tag)
-
+  klass.send(:deploy, env, tag)
 end
