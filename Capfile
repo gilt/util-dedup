@@ -4,7 +4,7 @@ set :gateway, '10.50.50.14'
 
 role :warehouse_server, 'job3'
 role :job_worker, 'job2', 'job3'
-role :rails_server, 'weba1', 'weba2', 'weba3', 'web-rails1', 'web-rails2', 'web-rails3'
+role :rails_server, 'weba1', 'weba2', 'weba3', 'web-rails1', 'web-rails2', 'web-rails3', 'irb1'
 
 ALL_ROLES = [:rails_server, :job_worker, :warehouse_server]
 
