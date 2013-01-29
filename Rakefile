@@ -17,9 +17,10 @@ task :create_release_branch, :repo, :branch do |t, args|
 end
 
 desc "Create a new tag on the /web/gilt repo; sends notifications"
-task :tag, :repo do |t, args|
+task :tag, :repo, :major_minor_micro do |t, args|
   repo = Util.get_arg(args, :repo)
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create")
+  increment = Util.get_optional_arg(args, :major_minor_micro) || 'micro'
+  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create #{increment}")
 end
 
 desc "Merge source branch into other, publishing announcement if dest_branch is master"
