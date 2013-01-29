@@ -32,6 +32,10 @@ module Util
     puts "ERROR: #{e.to_s}"
   end
 
+  def Util.get_optional_arg(args, name, default_value=nil)
+    args[name] || default_value
+  end
+
   def Util.get_arg(args, name)
     value = args[name]
     if value.nil? || value.strip == ""
