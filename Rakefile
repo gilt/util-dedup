@@ -9,35 +9,49 @@ def run(command)
   end
 end
 
-desc "Creates a new release branch - if there is an existing release branch, fails, otherwise will create a new branch and update setup that this is the new release branch"
-task :create_release_branch, :repo, :branch do |t, args|
-  repo = Util.get_arg(args, :repo)
-  branch = Util.get_arg(args, :branch)
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner create #{branch}")
-end
+namespace :tag do
 
-desc "Create a new tag on the /web/gilt repo; sends notifications"
-task :tag, :repo, :major_minor_micro do |t, args|
-  repo = Util.get_arg(args, :repo)
-  increment = Util.get_optional_arg(args, :major_minor_micro) || 'micro'
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create #{increment}")
-end
-
-desc "Merge source branch into other, publishing announcement if dest_branch is master"
-task :merge, :repo, :source_branch, :target_branch do |t, args|
-  repo = Util.get_arg(args, :repo)
-  source_branch = Util.get_arg(args, :source_branch)
-  target_branch = Util.get_arg(args, :target_branch)
-
-  if target_branch != "master"
-    raise "Merging is currently only supported to master. Other branches should rebase origin/master"
+  desc "Display latest tag"
+  task :latest, :repo do |t, args|
+    repo = Util.get_arg(args, :repo)
+    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag latest")
   end
 
-  if source_branch == "master"
-    raise "Merging from source_branch master not supported. Other branches should rebase origin/master"
+  desc "Create a new tag on the /web/gilt repo; sends notifications"
+  task :create, :repo, :major_minor_micro do |t, args|
+    repo = Util.get_arg(args, :repo)
+    increment = Util.get_optional_arg(args, :major_minor_micro) || 'micro'
+    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create #{increment}")
   end
 
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner merge #{source_branch} #{target_branch}")
+end
+
+namespace :release_owner do
+
+  desc "Creates a new release branch - if there is an existing release branch, fails, otherwise will create a new branch and update setup that this is the new release branch"
+  task :create, :repo, :branch do |t, args|
+    repo = Util.get_arg(args, :repo)
+    branch = Util.get_arg(args, :branch)
+    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner create #{branch}")
+  end
+
+  desc "Merge source branch into other, publishing announcement if dest_branch is master"
+  task :merge, :repo, :source_branch, :target_branch do |t, args|
+    repo = Util.get_arg(args, :repo)
+    source_branch = Util.get_arg(args, :source_branch)
+    target_branch = Util.get_arg(args, :target_branch)
+
+    if target_branch != "master"
+      raise "Merging is currently only supported to master. Other branches should rebase origin/master"
+    end
+
+    if source_branch == "master"
+      raise "Merging from source_branch master not supported. Other branches should rebase origin/master"
+    end
+
+    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner merge #{source_branch} #{target_branch}")
+  end
+
 end
 
 desc "cherrypick a single ref to the specified branch"

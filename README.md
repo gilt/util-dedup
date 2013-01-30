@@ -6,10 +6,10 @@ rake commands for common tasks.
 
 Common flow
 =========================================================
-rake create_release_branch[gilt,bizops]
+rake release_owner:create[gilt,bizops]  ## TODO Figure out clearer name
 rake merge[gilt,bizops_20121212,master]
+rake tag:create[gilt]
 rake deploy[production,gilt,r20130103.1]
-
 
 Adding new code
 =========================================================
