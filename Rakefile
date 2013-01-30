@@ -13,7 +13,7 @@ desc "Creates a new release branch - if there is an existing release branch, fai
 task :create_release_branch, :repo, :branch do |t, args|
   repo = Util.get_arg(args, :repo)
   branch = Util.get_arg(args, :branch)
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} create_release_branch #{branch}")
+  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner create #{branch}")
 end
 
 desc "Create a new tag on the /web/gilt repo; sends notifications"
@@ -24,11 +24,20 @@ task :tag, :repo, :major_minor_micro do |t, args|
 end
 
 desc "Merge source branch into other, publishing announcement if dest_branch is master"
-task :merge, :repo, :source_branch, :dest_branch do |t, args|
+task :merge, :repo, :source_branch, :target_branch do |t, args|
   repo = Util.get_arg(args, :repo)
-  branch = Util.get_arg(args, :branch)
-  raise 'NOT DONE'
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release_owner merge #{branch}")
+  source_branch = Util.get_arg(args, :source_branch)
+  target_branch = Util.get_arg(args, :target_branch)
+
+  if target_branch != "master"
+    raise "Merging is currently only supported to master. Other branches should rebase origin/master"
+  end
+
+  if source_branch == "master"
+    raise "Merging from source_branch master not supported. Other branches should rebase origin/master"
+  end
+
+  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner merge #{source_branch} #{target_branch}")
 end
 
 desc "cherrypick a single ref to the specified branch"
