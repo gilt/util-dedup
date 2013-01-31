@@ -3,6 +3,11 @@ Utilities for deploying rails applications at Gilt Groupe
 This is mostly a wrapper around util-install library, with simpler
 rake commands for common tasks.
 
+Install
+=========================================================
+cd /web/
+util-eng/bin/gg-gerrit-clone svc-software-install
+
 
 Common flow
 =========================================================
