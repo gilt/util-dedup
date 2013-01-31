@@ -71,10 +71,6 @@ task :deploy, :env, :repo, :tag do |t, args|
   repo = Util.get_arg(args, :repo)
   tag = Util.get_arg(args, :tag)
   dir = "/web/#{repo}"
-  if !Tag.new(dir).exists?(tag)
-    puts "ERROR: Tag[%s] not found" % [tag]
-    exit(1)
-  end
   class_name = "Deploy::#{repo.capitalize}"
   begin
     klass = eval(class_name)
