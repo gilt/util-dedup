@@ -19,6 +19,12 @@ end
 
 namespace :release_branch do
 
+  desc "Displays the current release branch, if any"
+  task :current, :repo do |t, args|
+    repo = Util.get_arg(args, :repo)
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} release-branch current")
+  end
+
   desc "Creates a new release branch - if there is an existing release branch, fails, otherwise will create a new branch and update setup that this is the new release branch"
   task :create, :repo, :branch do |t, args|
     repo = Util.get_arg(args, :repo)
