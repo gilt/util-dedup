@@ -1,38 +1,35 @@
 require 'lib/load.rb'
 
-current_user = `whoami`.strip
-
-def run(command)
-  puts command
-  if !system(command)
-    raise "Command failed with invalid response code: #{command}"
-  end
-end
-
 namespace :tag do
 
   desc "Display latest tag"
   task :latest, :repo do |t, args|
     repo = Util.get_arg(args, :repo)
-    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag latest")
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} tag latest")
   end
 
   desc "Create a new tag on the /web/gilt repo; sends notifications"
   task :create, :repo, :major_minor_micro do |t, args|
     repo = Util.get_arg(args, :repo)
     increment = Util.get_optional_arg(args, :major_minor_micro) || 'micro'
-    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} tag create #{increment}")
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} tag create #{increment}")
   end
 
 end
 
-namespace :release_owner do
+namespace :release_branch do
 
   desc "Creates a new release branch - if there is an existing release branch, fails, otherwise will create a new branch and update setup that this is the new release branch"
   task :create, :repo, :branch do |t, args|
     repo = Util.get_arg(args, :repo)
     branch = Util.get_arg(args, :branch)
-    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner create #{branch}")
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} release-branch create #{branch}")
+  end
+
+  desc "Clears the current release_branch"
+  task :clear, :repo do |t, args|
+    repo = Util.get_arg(args, :repo)
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} release-branch clear")
   end
 
   desc "Merge source branch into other, publishing announcement if dest_branch is master"
@@ -49,7 +46,7 @@ namespace :release_owner do
       raise "Merging from source_branch master not supported. Other branches should rebase origin/master"
     end
 
-    run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} release-owner merge #{source_branch} #{target_branch}")
+    Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} release-branch merge #{source_branch} #{target_branch}")
   end
 
 end
@@ -59,7 +56,7 @@ task :cherrypick, :repo, :ref, :branch do |t, args|
   repo = Util.get_arg(args, :repo)
   ref = Util.get_arg(args, :ref )
   branch = Util.get_arg(args, :branch)
-  run("/web/util-install/bin/util_deploy.rb '#{current_user}' #{repo} cherry-pick %s %s" % [ref, branch])
+  Util.system_or_fail("/web/util-install/bin/util_deploy.rb '#{Util.current_user}' #{repo} cherry-pick %s %s" % [ref, branch])
 end
 
 desc "Create a new tag in repo, send notifications"
