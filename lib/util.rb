@@ -1,5 +1,16 @@
 module Util
 
+  def Util.current_user
+    username = ENV['COMMITTER'].to_s
+    if username == ""
+      username = `git config --get user.email`.strip
+      if username.to_s == ""
+        raise "No current_user. Either set COMMITTER environment variable or git config --set user.email \"you@gilt.com\""
+      end
+    end
+    username
+  end
+
   def Util.system_or_fail(command)
     puts command
     result = system(command)
