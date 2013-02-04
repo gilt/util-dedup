@@ -57,14 +57,6 @@ namespace :release_branch do
 
 end
 
-desc "cherrypick a single ref to the specified branch"
-task :cherrypick, :repo, :ref, :branch do |t, args|
-  repo = Util.get_arg(args, :repo)
-  ref = Util.get_arg(args, :ref )
-  branch = Util.get_arg(args, :branch)
-  Util.system_or_fail("/web/svc-software-install/bin/deploy.rb '#{Util.current_user}' #{repo} cherry-pick %s %s" % [ref, branch])
-end
-
 desc "Create a new tag in repo, send notifications"
 task :deploy, :env, :repo, :tag do |t, args|
   env = Util.get_arg(args, :env)
