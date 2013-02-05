@@ -14,7 +14,7 @@ module Deploy
         raise "Not yet implemented for env[%s]" % [env]
       end
 
-      Util.system_or_fail("export TAG=%s && cap production:deploy" % [tag])
+      Util.system_or_fail("export TAG=%s && cap -f lib/deploy/gilt.cap production:deploy" % [tag])
 
       if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
         message = "completed production deploy of rails version %s" % [tag]
