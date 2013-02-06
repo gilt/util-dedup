@@ -58,8 +58,11 @@ module Util
   # Prints message followed by y/n. Returns true if user enters
   # y/yes/etc. false otherwise.
   def Util.ask_boolean(message)
-    print message.strip + " (y/n) "
-    continue = STDIN.gets.strip
+    continue = nil
+    while continue.to_s == ""
+      print message.strip + " (y/n) "
+      continue = STDIN.gets.strip
+    end
     continue.split('').first.to_s.downcase == "y"
   end
 
