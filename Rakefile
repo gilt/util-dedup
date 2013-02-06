@@ -57,17 +57,26 @@ namespace :release_branch do
 
 end
 
-desc "Create a new tag in repo, send notifications"
-task :deploy, :env, :repo, :tag do |t, args|
-  env = Util.get_arg(args, :env)
-  repo = Util.get_arg(args, :repo)
-  tag = Util.get_arg(args, :tag)
-  dir = "/web/#{repo}"
-  class_name = "Deploy::#{repo.capitalize}"
-  begin
-    klass = eval(class_name)
-  rescue Exception => e
-    raise "Could not find class[#{class_name}]. If repo name is correct, the module should be defined in lib/deploy/"
+namespace :deploy do
+
+  desc "Deploy a specified tag to production"
+  task :production, :repo, :tag do |t, args|
+    repo = Util.get_arg(args, :repo)
+    tag = Util.get_arg(args, :tag)
+    class_name = "Deploy::#{repo.capitalize}"
+    begin
+      klass = eval(class_name)
+    rescue Exception => e
+      raise "Could not find class[#{class_name}]. If repo name is correct, the module should be defined in lib/deploy/#{repo}.rb"
+    end
+    klass.send(:deploy_production, tag)
   end
-  klass.send(:deploy, env, tag)
+
+  desc "Deploys a specified repo/tag to staging by queuing that file for next integration release"
+  task :integration, :repo, :tag do |t, args|
+    repo = Util.get_arg(args, :repo)
+    tag = Util.get_arg(args, :tag)
+    Integration.new(repo).queue_for_integration(tag)
+  end
+
 end

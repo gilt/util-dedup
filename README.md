@@ -14,7 +14,11 @@ Common flow
 rake release_branch:create[gilt,bizops]
 rake merge[gilt,bizops_20121212,master]
 rake tag:create[gilt]
-rake deploy[production,gilt,r20130103.1]
+rake deploy:production[gilt,r20130103.1]
+
+Integration
+=========================================================
+rake deploy:integration[gilt,r20130103.1]
 
 Adding new code
 =========================================================
