@@ -1,28 +1,25 @@
-# Non standard deploy for the gilt repo
+1# Non standard deploy for the gilt repo
 module Deploy
 
   module Gilt
 
-    def Gilt.deploy(env, tag)
-      puts "Rails deploy to env[#{env}] starting. You need to manually post into the Skype chat room Gilt US Production"
-      puts "   rails %s to %s" % [tag, env]
-      if !Util.ask_boolean("Continue?")
-        exit(0)
+    def Gilt.deploy_production(tag)
+      puts "Rails production deploy starting. You need to manually post into the Skype chat room Gilt US Production"
+      puts "   rails %s => production" % [tag]
+      if Util.ask_boolean("Continue?")
+        Util.system_or_fail("export TAG=%s && cap --file lib/deploy/gilt.cap production:deploy" % [tag])
+
+        if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
+          message = "completed production deploy of rails version %s" % [tag]
+          puts message
+        end
       end
-
-      if env != 'production'
-        raise "Not yet implemented for env[%s]" % [env]
-      end
-
-      Util.system_or_fail("export TAG=%s && cap -f lib/deploy/gilt.cap production:deploy" % [tag])
-
-      if ScmsVersion.verify_single_scms_version("http://www.gilt.com")
-        message = "completed production deploy of rails version %s" % [tag]
-        puts message
-      end
-
     end
 
+    # Internal module to verify that the deploy succeeded across all
+    # nodes. Basically hits /system/active_scms_version_ids once
+    # deployed and ensures that all nodes are on the same version of
+    # code.
     module ScmsVersion
 
       class Instance
