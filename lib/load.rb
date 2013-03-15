@@ -1,4 +1,5 @@
 require 'lib/util.rb'
+require 'lib/update.rb'
 require 'lib/preconditions.rb'
 require 'lib/integration.rb'
 

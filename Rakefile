@@ -1,7 +1,8 @@
 require 'lib/load.rb'
 
-namespace :tag do
+Update.update_to_latest
 
+namespace :tag do
   desc "Display latest tag"
   task :latest, :repo do |t, args|
     repo = Util.get_arg(args, :repo)
@@ -38,21 +39,16 @@ namespace :release_branch do
     Util.system_or_fail("/web/svc-software-install/bin/deploy.rb '#{Util.current_user}' #{repo} release-branch clear")
   end
 
-  desc "Merge source branch into other, publishing announcement if dest_branch is master"
-  task :merge, :repo, :source_branch, :target_branch do |t, args|
+  desc "Merge source branch into master and publishing an announcement"
+  task :merge, :repo, :source_branch do |t, args|
     repo = Util.get_arg(args, :repo)
     source_branch = Util.get_arg(args, :source_branch)
-    target_branch = Util.get_arg(args, :target_branch)
-
-    if target_branch != "master"
-      raise "Merging is currently only supported to master. Other branches should rebase origin/master"
-    end
 
     if source_branch == "master"
       raise "Merging from source_branch master not supported. Other branches should rebase origin/master"
     end
 
-    Util.system_or_fail("/web/svc-software-install/bin/deploy.rb '#{Util.current_user}' #{repo} release-branch merge #{source_branch} #{target_branch}")
+    Util.system_or_fail("/web/svc-software-install/bin/deploy.rb '#{Util.current_user}' #{repo} release-branch merge #{source_branch} master")
   end
 
 end
