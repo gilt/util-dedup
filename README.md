@@ -1,7 +1,10 @@
 Created to simplify how we compare gilt's membership list with other
-companies list. The idea is to prevent sharing the full email list of
-all gilt members, and instead share a hash of those email lists (and a
-salt) with the other company.
+lists. The idea is to prevent sharing any PII (e.g. email address)
+and instead share a hash of those email addresses (and a salt) with
+a third party to determine things like:
+
+  a. which email addresses exist in both lists
+  b. which email addresses exist in my list but not theirs
 
 Scripts here are intended to require ZERO dependencies, work cross
 platform, and be simple to use.
@@ -9,7 +12,7 @@ platform, and be simple to use.
     javac *.java
 
     # Create a test file. Note that the dedup will lowercase / trim
-    # white space for each ilne in the file.
+    # white space for each line in the file.
     echo "michael@gilt.com" > emails.txt
     echo "MICHAEL@gilt.com" >> emails.txt
     echo " michael@gilt.com " >> emails.txt
